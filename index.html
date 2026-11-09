@@ -104,6 +104,20 @@
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    #moments { border-top: 1px solid rgba(240,236,228,0.08); }
+    .moments-title { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 400; margin-bottom: 1rem; }
+    .moments-title em { font-style: italic; color: var(--gold); }
+    .moments-sub { color: rgba(240,236,228,0.6); font-weight: 400; margin-bottom: 3rem; max-width: 560px; line-height: 1.8; }
+    .moments-grid { columns: 3 280px; column-gap: 1rem; }
+    .moment { break-inside: avoid; margin: 0 0 1rem; background: #111; position: relative; overflow: hidden; cursor: zoom-in; }
+    .moment img { width: 100%; display: block; transition: transform 0.6s ease, opacity 0.3s; }
+    .moment:hover img { transform: scale(1.03); }
+    .moment figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.5rem 1rem 0.9rem; background: linear-gradient(transparent, rgba(8,8,8,0.88)); font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--offwhite); line-height: 1.6; }
+    .moment figcaption b { color: var(--gold); font-weight: 400; display: block; }
+    #lightbox { position: fixed; inset: 0; background: rgba(8,8,8,0.94); display: none; align-items: center; justify-content: center; z-index: 999; cursor: zoom-out; padding: 1.5rem; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
@@ -126,6 +140,7 @@
   <a class="nav-logo" href="#">Danny One</a>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
+    <li><a href="#moments">Moments</a></li>
     <li><a href="#music">Music</a></li>
     <li><a href="#connect">Connect</a></li>
     <li><a href="mailto:info@dannyone.io">Contact</a></li>
@@ -179,6 +194,25 @@
   </div>
 </section>
 
+<section id="moments" style="max-width:1200px; margin:0 auto;">
+  <p class="section-label reveal">Moments · 近況</p>
+  <h2 class="moments-title reveal">Recent <em>Moments</em></h2>
+  <p class="moments-sub reveal">舞台、電台、播客與展覽。最近的一些畫面。<br>Stage, radio, podcast and exhibitions. A few frames from lately.</p>
+  <div class="moments-grid">
+    <figure class="moment reveal"><img src="images/fest-1.jpg" alt="988 After Work Fest 2026" loading="lazy"><figcaption><b>988 After Work Fest 2026</b>現場演出 · Live on stage</figcaption></figure>
+    <figure class="moment reveal"><img src="images/fest-3.jpg" alt="988 After Work Fest 2026" loading="lazy"><figcaption><b>988 After Work Fest 2026</b>台上 · On stage</figcaption></figure>
+    <figure class="moment reveal"><img src="images/hari-kebangsaan.jpg" alt="Sambutan Hari Kebangsaan 2026" loading="lazy"><figcaption><b>Sambutan Hari Kebangsaan 2026</b>Suria × 988 · 現場主持 · Hosting live</figcaption></figure>
+    <figure class="moment reveal"><img src="images/huahualah.jpg" alt="畫話啦" loading="lazy"><figcaption><b>畫話啦</b>Podcast · 畫畫聊天 · Draw and talk</figcaption></figure>
+    <figure class="moment reveal"><img src="images/fujifilm-connect.jpg" alt="Fujifilm Connect Malaysia" loading="lazy"><figcaption><b>Fujifilm Connect Malaysia</b>25 Oct · Speaker · 分享會講者</figcaption></figure>
+    <figure class="moment reveal"><img src="images/fest-2.jpg" alt="988 After Work Fest 2026" loading="lazy"><figcaption><b>988 After Work Fest 2026</b>唱到投入 · Lost in the song</figcaption></figure>
+    <figure class="moment reveal"><img src="images/exhibit-1.jpg" alt="Exhibition" loading="lazy"><figcaption><b>Exhibition</b>展覽 · On show</figcaption></figure>
+    <figure class="moment reveal"><img src="images/exhibit-2.jpg" alt="Exhibition" loading="lazy"><figcaption><b>Exhibition</b>細節 · Detail</figcaption></figure>
+    <figure class="moment reveal"><img src="images/exhibit-3.jpg" alt="Exhibition" loading="lazy"><figcaption><b>Exhibition</b>插畫 · Illustration</figcaption></figure>
+    <figure class="moment reveal"><img src="images/selfie.jpg" alt="Behind the scenes" loading="lazy"><figcaption><b>Behind the scenes</b>幕後 · Backstage</figcaption></figure>
+  </div>
+</section>
+<div id="lightbox"><img alt=""></div>
+
 <section id="music" style="max-width:1200px; margin:0 auto;">
   <p class="section-label reveal">Music · 音樂</p>
   <h2 class="music-title reveal">Danny<em>one</em> TV</h2>
@@ -215,6 +249,10 @@
 <script>
   const nav = document.getElementById('navbar');
   window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
+  const lb = document.getElementById('lightbox');
+  document.querySelectorAll('.moment img').forEach(i => i.addEventListener('click', () => { lb.querySelector('img').src = i.src; lb.classList.add('open'); }));
+  lb.addEventListener('click', () => lb.classList.remove('open'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 80); observer.unobserve(e.target); } });
