@@ -229,16 +229,11 @@ input[type=range]{accent-color:var(--amber);width:100%}
       <div class="onair">
         <span class="sign off" id="sign">ON AIR</span>
         <div>
-          <div style="font-weight:600">988 Café · lo-fi for focus</div>
-          <div class="small">Slow chords, rain on the window, a little vinyl. Open 24 hours.</div>
+          <div style="font-weight:600" id="showTitle">988 Café · lo-fi for focus</div>
+          <div class="small" id="showSub">Slow chords, rain on the window, a little vinyl. Open 24 hours.</div>
         </div>
       </div>
       <div class="row" style="margin-top:12px"><button class="btn ghost" id="audioBtn">Turn on the radio</button></div>
-      <div id="livebox" hidden style="margin-top:12px">
-        <div class="small" style="margin-bottom:6px">988 live 直播 · press play below</div>
-        <iframe id="liveFrame" title="988 live player" allow="autoplay; encrypted-media" style="width:100%;height:260px;border:0;border-radius:10px;background:#000"></iframe>
-        <a class="small" href="https://player.listenlive.co/63371" target="_blank" rel="noopener">Player not loading? Open it in a new tab ↗</a>
-      </div>
       <div class="mix">
         <label for="vMusic" style="margin:0">Music</label><input type="range" id="vMusic" min="0" max="100" value="55">
         <label for="vRain" style="margin:0">Rain</label><input type="range" id="vRain" min="0" max="100" value="45">
@@ -258,11 +253,13 @@ input[type=range]{accent-color:var(--amber);width:100%}
 (() => {
 "use strict";
 const $ = id => document.getElementById(id);
-/* 988 live player: off by default until 988 approves. Test with dannyone.io/cafe/?live  or set LIVE_PLAYER = true */
+/* 988 live radio: off by default until 988 approves. Test with dannyone.io/cafe/?live  or set LIVE_PLAYER = true.
+   When on, "Turn on the radio" plays the 988 FM stream; if it can't play, it falls back to the café's own lo-fi. */
 const LIVE_PLAYER = false;
-if (LIVE_PLAYER || new URLSearchParams(location.search).has("live")){
-  $("liveFrame").src = "https://player.listenlive.co/63371"; $("livebox").hidden = false;
-}
+const STREAM_988 = "https://playerservices.streamtheworld.com/api/livestream-redirect/988_FM.mp3";
+let live988 = LIVE_PLAYER || new URLSearchParams(location.search).has("live");
+const radio = new Audio(); radio.preload = "none";
+if (live988){ $("showTitle").textContent = "988 FM · 直播 live"; $("showSub").textContent = "Live from Kuala Lumpur. Rain on the window if you like."; }
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
@@ -1012,7 +1009,7 @@ function ensureAudio(){ try{ if (!ac){ ac = new (window.AudioContext || window.w
   const len = ac.sampleRate*3, buf = ac.createBuffer(1, len, ac.sampleRate), data = buf.getChannelData(0); let last = 0; for (let i=0;i<len;i++){ const w = Math.random()*2-1; last = (last + .02*w)/1.02; data[i] = last*2.2 + w*.06; }
   const src = ac.createBufferSource(); src.buffer = buf; src.loop = true; const rf = ac.createBiquadFilter(); rf.type = "lowpass"; rf.frequency.value = 2200; src.connect(rf); rf.connect(rainGain); rainGain.connect(master); src.start();
   musicGain.gain.value = 0; rainGain.gain.value = 0; } if (ac.state === "suspended") ac.resume(); } catch(e){ $("audioBtn").textContent = "Audio not available here"; $("audioBtn").disabled = true; } }
-function vol(){ if (!ac) return; musicGain.gain.setTargetAtTime(playing ? $("vMusic").value/100*.5 : 0, ac.currentTime, .3); rainGain.gain.setTargetAtTime(playing ? $("vRain").value/100*.6 : 0, ac.currentTime, .3); }
+function vol(){ radio.volume = $("vMusic").value/100; if (!ac) return; musicGain.gain.setTargetAtTime(playing && !live988 ? $("vMusic").value/100*.5 : 0, ac.currentTime, .3); rainGain.gain.setTargetAtTime(playing ? $("vRain").value/100*.6 : 0, ac.currentTime, .3); }
 $("vMusic").addEventListener("input", vol); $("vRain").addEventListener("input", vol);
 function note(m, t, dur, g){ [0,7].forEach(det => { const o = ac.createOscillator(), e = ac.createGain(); o.type = det ? "sine" : "triangle"; o.frequency.value = hz(m); o.detune.value = det;
   e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(g,t+.04); e.gain.exponentialRampToValueAtTime(g*.35,t+1.2); e.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(e); e.connect(musicGain); o.start(t); o.stop(t+dur+.05); }); }
@@ -1021,11 +1018,18 @@ function hat(t){ const b = ac.createBuffer(1, ac.sampleRate*.05, ac.sampleRate),
   const s = ac.createBufferSource(), f = ac.createBiquadFilter(), e = ac.createGain(); f.type = "highpass"; f.frequency.value = 6000; e.gain.value = .06; s.buffer = b; s.connect(f); f.connect(e); e.connect(musicGain); s.start(t); }
 function schedule(){ while (nextBar < ac.currentTime + .6){ const ch = CHORDS[barIdx % CHORDS.length], t = nextBar; ch.forEach((m,i) => note(m, t + i*.03, BAR*.95, .05)); note(ch[0]-12, t, BAR*.9, .09);
   const beat = BAR/4; [0,2].forEach(b => kick(t + b*beat)); [0,1,2,3].forEach(b => hat(t + b*beat + beat/2 + .03)); if (barIdx % 2 === 1) note(ch[ch.length-1]+12, t + beat*2.5, 1.2, .03); nextBar += BAR; barIdx++; } }
+function startLofi(){ nextBar = ac.currentTime + .1; sched = setInterval(schedule, 120); schedule(); }
+function lofiFallback(){ if (!live988) return; live988 = false; radio.pause(); radio.removeAttribute("src");
+  $("showTitle").textContent = "988 Café · lo-fi for focus"; $("showSub").textContent = "988 isn't reachable right now, so here's the house lo-fi.";
+  if (playing && ac){ startLofi(); vol(); } }
+radio.addEventListener("error", () => { if (radio.getAttribute("src")) lofiFallback(); });
 function toggleAudio(){ ensureAudio(); if (!ac) return; playing = !playing;
-  if (playing){ nextBar = ac.currentTime + .1; sched = setInterval(schedule, 120); schedule();
+  if (playing && live988){ radio.src = STREAM_988; radio.volume = $("vMusic").value/100; radio.play().catch(e => { if (playing && e.name !== "AbortError") lofiFallback(); }); }
+  else if (!playing && live988){ radio.pause(); radio.removeAttribute("src"); radio.load(); }
+  if (playing && !live988){ nextBar = ac.currentTime + .1; sched = setInterval(schedule, 120); schedule();
     crackle = setInterval(() => { if (Math.random() < .5){ const t = ac.currentTime + Math.random()*.2, b = ac.createBuffer(1, 80, ac.sampleRate), d = b.getChannelData(0); for (let i=0;i<80;i++) d[i] = (Math.random()*2-1)*(1-i/80);
       const s = ac.createBufferSource(), e = ac.createGain(); e.gain.value = .05*$("vMusic").value/100; s.buffer = b; s.connect(e); e.connect(ac.destination); s.start(t); } }, 180);
-  } else { clearInterval(sched); clearInterval(crackle); }
+  } else { clearInterval(sched); clearInterval(crackle); sched = crackle = null; }
   vol(); $("audioBtn").textContent = playing ? "Turn off the radio" : "Turn on the radio"; $("sign").classList.toggle("off", !playing); }
 $("audioBtn").addEventListener("click", toggleAudio);
 function chime(){ if (!ac) return; const t = ac.currentTime; [76,83,88].forEach((m,i) => { const o = ac.createOscillator(), e = ac.createGain(); o.type = "sine"; o.frequency.value = hz(m);
