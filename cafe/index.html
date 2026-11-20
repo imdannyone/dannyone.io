@@ -233,7 +233,7 @@ input[type=range]{accent-color:var(--amber);width:100%}
           <div class="small">Slow chords, rain on the window, a little vinyl. Open 24 hours.</div>
         </div>
       </div>
-      <div class="row" style="margin-top:12px"><button class="btn ghost" id="audioBtn">Turn on the radio</button><a class="btn" id="liveOut" href="https://player.listenlive.co/63371" target="_blank" rel="noopener" style="text-decoration:none">Listen to 988 live ↗</a></div>
+      <div class="row" style="margin-top:12px"><button class="btn ghost" id="audioBtn">Turn on the radio</button></div>
       <div id="livebox" hidden style="margin-top:12px">
         <div class="small" style="margin-bottom:6px">988 live 直播 · press play below</div>
         <iframe id="liveFrame" title="988 live player" allow="autoplay; encrypted-media" style="width:100%;height:260px;border:0;border-radius:10px;background:#000"></iframe>
@@ -261,7 +261,7 @@ const $ = id => document.getElementById(id);
 /* 988 live player: off by default until 988 approves. Test with dannyone.io/cafe/?live  or set LIVE_PLAYER = true */
 const LIVE_PLAYER = false;
 if (LIVE_PLAYER || new URLSearchParams(location.search).has("live")){
-  $("liveFrame").src = "https://player.listenlive.co/63371"; $("livebox").hidden = false; $("liveOut").style.display = "none";
+  $("liveFrame").src = "https://player.listenlive.co/63371"; $("livebox").hidden = false;
 }
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
