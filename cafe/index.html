@@ -183,6 +183,22 @@ input[type=range]{accent-color:var(--amber);width:100%}
 
   <aside class="side">
     <div class="card">
+      <h2>On air <span class="zh">收音中</span></h2>
+      <div class="onair">
+        <span class="sign off" id="sign">ON AIR</span>
+        <div>
+          <div style="font-weight:600" id="showTitle">988 Café · lo-fi for focus</div>
+          <div class="small" id="showSub">Slow chords, rain on the window, a little vinyl. Open 24 hours.</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="btn ghost" id="audioBtn">Turn on the radio</button></div>
+      <div class="mix">
+        <label for="vMusic" style="margin:0">Music</label><input type="range" id="vMusic" min="0" max="100" value="55">
+        <label for="vRain" style="margin:0">Rain</label><input type="range" id="vRain" min="0" max="100" value="45">
+      </div>
+    </div>
+
+    <div class="card">
       <h2><span class="n">01</span>Your character <span class="zh">你嘅角色</span></h2>
       <div class="maker">
         <canvas id="preview" width="240" height="300" aria-label="Preview of your character"></canvas>
@@ -221,22 +237,6 @@ input[type=range]{accent-color:var(--amber);width:100%}
           <button class="btn ghost" id="stopBtn" disabled>End early</button>
           <span class="small">Done tonight: <span class="stat" id="done">0</span></span>
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>On air <span class="zh">收音中</span></h2>
-      <div class="onair">
-        <span class="sign off" id="sign">ON AIR</span>
-        <div>
-          <div style="font-weight:600" id="showTitle">988 Café · lo-fi for focus</div>
-          <div class="small" id="showSub">Slow chords, rain on the window, a little vinyl. Open 24 hours.</div>
-        </div>
-      </div>
-      <div class="row" style="margin-top:12px"><button class="btn ghost" id="audioBtn">Turn on the radio</button></div>
-      <div class="mix">
-        <label for="vMusic" style="margin:0">Music</label><input type="range" id="vMusic" min="0" max="100" value="55">
-        <label for="vRain" style="margin:0">Rain</label><input type="range" id="vRain" min="0" max="100" value="45">
       </div>
     </div>
 
